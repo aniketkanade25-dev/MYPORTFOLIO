@@ -18,6 +18,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
 BREVO_API_KEY = os.getenv("BREVO_API_KEY")
+SITE_URL = os.getenv("SITE_URL", "").strip().rstrip("/")
 
 
 # Quick-start development settings - unsuitable for production

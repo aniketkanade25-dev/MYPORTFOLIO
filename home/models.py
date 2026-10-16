@@ -9,6 +9,14 @@ class Project(models.Model):
 
     description = models.TextField()
 
+    problem = models.TextField(blank=True, default="")
+
+    approach = models.TextField(blank=True, default="")
+
+    outcome = models.TextField(blank=True, default="")
+
+    featured = models.BooleanField(default=False)
+
     technologies = models.CharField(max_length=300)
     image = models.ImageField(upload_to="projects/", blank=True, null=True)
 

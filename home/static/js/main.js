@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const scrollProgressBar = document.getElementById("scrollProgressBar");
 
     function updateScrollProgress() {
+        document.body.classList.toggle("has-scrolled", window.scrollY > 40);
         if (!scrollProgressBar) {
             return;
         }
@@ -30,6 +31,83 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("scroll", scheduleProgressUpdate, { passive: true });
     window.addEventListener("resize", scheduleProgressUpdate, { passive: true });
     updateScrollProgress();
+
+    const indiaTime = document.getElementById("indiaTime");
+    if (indiaTime) {
+        const indiaClock = new Intl.DateTimeFormat("en-IN", {
+            timeZone: "Asia/Kolkata",
+            hour: "2-digit",
+            minute: "2-digit",
+            hourCycle: "h23",
+        });
+        const updateIndiaTime = () => {
+            const now = new Date();
+            indiaTime.textContent = `${indiaClock.format(now)} IST`;
+            indiaTime.dateTime = now.toISOString();
+        };
+
+        updateIndiaTime();
+        window.setInterval(updateIndiaTime, 1000);
+    }
+
+    const roleRotator = document.getElementById("roleRotator");
+    const rotatingRole = document.getElementById("rotatingRole");
+    if (roleRotator && rotatingRole && !prefersReducedMotion) {
+        const roles = [
+            "DJANGO DEVELOPER",
+            "DATA SCIENCE ENTHUSIAST",
+            "ML & AI LEARNER",
+            "IoT TINKERER",
+        ];
+        let roleIndex = 0;
+        let roleTimer = 0;
+        let rolePaused = false;
+
+        const scheduleRoleChange = () => {
+            window.clearTimeout(roleTimer);
+            if (!rolePaused) {
+                roleTimer = window.setTimeout(changeRole, 2600);
+            }
+        };
+
+        const changeRole = () => {
+            rotatingRole.classList.add("is-leaving");
+            window.setTimeout(() => {
+                roleIndex = (roleIndex + 1) % roles.length;
+                rotatingRole.textContent = roles[roleIndex];
+                rotatingRole.classList.remove("is-leaving");
+                rotatingRole.classList.add("is-entering");
+                window.requestAnimationFrame(() => {
+                    rotatingRole.classList.remove("is-entering");
+                });
+                scheduleRoleChange();
+            }, 360);
+        };
+
+        roleRotator.addEventListener("pointerenter", (event) => {
+            if (event.pointerType !== "mouse") {
+                return;
+            }
+            rolePaused = true;
+            window.clearTimeout(roleTimer);
+        }, { passive: true });
+        roleRotator.addEventListener("pointerleave", (event) => {
+            if (event.pointerType !== "mouse") {
+                return;
+            }
+            rolePaused = false;
+            scheduleRoleChange();
+        }, { passive: true });
+        roleRotator.addEventListener("focusin", () => {
+            rolePaused = true;
+            window.clearTimeout(roleTimer);
+        });
+        roleRotator.addEventListener("focusout", () => {
+            rolePaused = false;
+            scheduleRoleChange();
+        });
+        scheduleRoleChange();
+    }
 
     const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
     const magneticButtons = document.querySelectorAll("[data-magnetic]");
@@ -154,6 +232,38 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }, { passive: true });
         });
+
+        const hero = document.querySelector(".hero");
+        const portrait = document.querySelector(".hero-image");
+        if (hero && portrait) {
+            let portraitFrame = 0;
+            const updatePortraitParallax = () => {
+                portraitFrame = 0;
+                const parallaxY = Math.min(16, window.scrollY * 0.025);
+                portrait.style.setProperty("--portrait-y", `${parallaxY}px`);
+            };
+            const schedulePortraitParallax = () => {
+                if (!portraitFrame) {
+                    portraitFrame = window.requestAnimationFrame(updatePortraitParallax);
+                }
+            };
+
+            window.addEventListener("scroll", schedulePortraitParallax, { passive: true });
+            schedulePortraitParallax();
+
+            hero.addEventListener("pointermove", (event) => {
+                const bounds = portrait.getBoundingClientRect();
+                const horizontalPosition = (event.clientX - bounds.left) / bounds.width - 0.5;
+                const verticalPosition = (event.clientY - bounds.top) / bounds.height - 0.5;
+                portrait.style.setProperty("--portrait-tilt", `${horizontalPosition * 12}deg`);
+                portrait.style.setProperty("--portrait-tilt-x", `${verticalPosition * -4}deg`);
+            }, { passive: true });
+
+            hero.addEventListener("pointerleave", () => {
+                portrait.style.setProperty("--portrait-tilt", "0deg");
+                portrait.style.setProperty("--portrait-tilt-x", "0deg");
+            }, { passive: true });
+        }
     }
 
     if (landingScreen && exploreButton) {
@@ -249,7 +359,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const splitHeadings = document.querySelectorAll(".section-header h2, .tech-heading h2");
     splitHeadings.forEach((heading) => {
-        heading.setAttribute("aria-label", heading.textContent.replace(/\s+/g, " ").trim());
+        heading.setAttribute("aria-label", heading.innerText.replace(/\s+/g, " ").trim());
         const textWalker = document.createTreeWalker(heading, NodeFilter.SHOW_TEXT);
         const textNodes = [];
 
@@ -314,6 +424,43 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    const projectStat = document.querySelector("[data-count]");
+    if (projectStat) {
+        const projectCount = Number(projectStat.dataset.count);
+        const setProjectCount = (value) => {
+            projectStat.textContent = String(value);
+        };
+
+        if (prefersReducedMotion || !("IntersectionObserver" in window)) {
+            setProjectCount(projectCount);
+        } else {
+            setProjectCount(0);
+            const countObserver = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (!entry.isIntersecting) {
+                        return;
+                    }
+
+                    countObserver.unobserve(entry.target);
+                    const startTime = performance.now();
+                    const duration = 900;
+
+                    const animateCount = (now) => {
+                        const progress = Math.min((now - startTime) / duration, 1);
+                        setProjectCount(Math.floor(projectCount * progress));
+                        if (progress < 1) {
+                            window.requestAnimationFrame(animateCount);
+                        }
+                    };
+
+                    window.requestAnimationFrame(animateCount);
+                });
+            }, { threshold: 0.5 });
+
+            countObserver.observe(projectStat);
+        }
+    }
+
     const navigationLinks = Array.from(document.querySelectorAll('nav a[href^="#"]'));
     const navigationSections = navigationLinks
         .map((link) => document.getElementById(link.hash.slice(1)))
@@ -350,16 +497,665 @@ document.addEventListener("DOMContentLoaded", () => {
         navigationSections.forEach((section) => navigationObserver.observe(section));
     }
 
+    const projectRows = Array.from(document.querySelectorAll("[data-project-row]"));
+    const categoryButtons = document.querySelectorAll("[data-category-filter]");
+    const clearProjectFilter = document.getElementById("clearProjectFilter");
+    const noFilteredProjects = document.getElementById("noFilteredProjects");
+    const projectDialog = document.getElementById("projectDialog");
+    const projectDialogTitle = document.getElementById("projectDialogTitle");
+    const projectDialogContent = document.getElementById("projectDialogContent");
+    const projectDialogPosition = document.getElementById("projectDialogPosition");
+    const projectDialogClose = document.getElementById("projectDialogClose");
+    const previousProject = document.getElementById("previousProject");
+    const nextProject = document.getElementById("nextProject");
+    const backToTop = document.getElementById("backToTop");
+    const copyToast = document.getElementById("copyToast");
+    let selectedCategory = "all";
+    let selectedTechnology = "";
+    let filterVersion = 0;
+    let activeProjectRow = null;
+    let projectReturnFocus = null;
+    let copyToastTimer = 0;
+
+    function normalizeTechnology(value) {
+        return (value || "").trim().toLocaleLowerCase();
+    }
+
+    function applyProjectFilters(scrollToProjects = false) {
+        const currentVersion = ++filterVersion;
+        let visibleCount = 0;
+
+        projectRows.forEach((row) => {
+            const categoryMatches = selectedCategory === "all"
+                || normalizeTechnology(row.dataset.projectCategory) === selectedCategory;
+            const techButtons = Array.from(row.querySelectorAll(".project-tech-filter"));
+            const technologyMatches = !selectedTechnology
+                || techButtons.some((button) => normalizeTechnology(button.dataset.techFilter) === selectedTechnology);
+            const matches = categoryMatches && technologyMatches;
+
+            if (matches) {
+                visibleCount += 1;
+                row.hidden = false;
+                row.classList.remove("is-filtering-out");
+            } else {
+                row.classList.add("is-filtering-out");
+                window.setTimeout(() => {
+                    if (currentVersion === filterVersion) {
+                        row.hidden = true;
+                    }
+                }, prefersReducedMotion ? 0 : 220);
+            }
+        });
+
+        categoryButtons.forEach((button) => {
+            const isSelected = normalizeTechnology(button.dataset.categoryFilter) === selectedCategory;
+            button.classList.toggle("is-selected", isSelected);
+            button.setAttribute("aria-pressed", String(isSelected));
+        });
+
+        document.querySelectorAll("[data-tech-filter]").forEach((button) => {
+            const isSelected = normalizeTechnology(button.dataset.techFilter) === selectedTechnology;
+            button.setAttribute("aria-pressed", String(Boolean(selectedTechnology) && isSelected));
+        });
+
+        if (clearProjectFilter) {
+            clearProjectFilter.hidden = selectedCategory === "all" && !selectedTechnology;
+        }
+        if (noFilteredProjects) {
+            noFilteredProjects.hidden = visibleCount > 0 || projectRows.length === 0;
+        }
+        if (activeProjectRow?.hidden && projectDialog?.open) {
+            projectDialog.close();
+        }
+
+        if (scrollToProjects) {
+            document.getElementById("projects")?.scrollIntoView({
+                behavior: prefersReducedMotion ? "auto" : "smooth",
+                block: "start",
+            });
+        }
+    }
+
+    categoryButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            selectedCategory = normalizeTechnology(button.dataset.categoryFilter) || "all";
+            selectedTechnology = "";
+            applyProjectFilters();
+        });
+    });
+
+    clearProjectFilter?.addEventListener("click", () => {
+        selectedCategory = "all";
+        selectedTechnology = "";
+        applyProjectFilters();
+    });
+
+    function getVisibleProjectRows() {
+        return projectRows.filter((row) => !row.hidden);
+    }
+
+    function trapDialogFocus(dialog, event) {
+        if (event.key !== "Tab") {
+            return;
+        }
+
+        const focusable = Array.from(dialog.querySelectorAll(
+            "button:not(:disabled), input:not(:disabled), a[href], [tabindex='0']"
+        )).filter((element) => !element.hidden);
+        if (!focusable.length) {
+            event.preventDefault();
+            return;
+        }
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+        }
+    }
+
+    function renderProjectDetails(row) {
+        if (!projectDialog || !row) {
+            return;
+        }
+
+        activeProjectRow = row;
+        const titleButton = row.querySelector(".project-title-wrap h3 .project-open");
+        projectDialogTitle.textContent = titleButton?.textContent.trim() || "Project details";
+        const detailTemplate = row.querySelector(".project-detail-template");
+        projectDialogContent.replaceChildren(detailTemplate.content.cloneNode(true));
+
+        const visibleRows = getVisibleProjectRows();
+        const currentPosition = visibleRows.indexOf(row);
+        projectDialogPosition.textContent = `${currentPosition + 1} / ${visibleRows.length}`;
+        previousProject.disabled = visibleRows.length < 2;
+        nextProject.disabled = visibleRows.length < 2;
+    }
+
+    function openProjectDialog(row, returnFocus = document.activeElement) {
+        if (!projectDialog || !row || typeof projectDialog.showModal !== "function") {
+            return;
+        }
+
+        projectReturnFocus = returnFocus;
+        renderProjectDetails(row);
+        if (!projectDialog.open) {
+            projectDialog.showModal();
+        }
+        projectDialogClose?.focus();
+    }
+
+    function moveProjectDialog(direction) {
+        const visibleRows = getVisibleProjectRows();
+        if (visibleRows.length < 2 || !activeProjectRow) {
+            return;
+        }
+
+        const currentPosition = visibleRows.indexOf(activeProjectRow);
+        const nextPosition = (currentPosition + direction + visibleRows.length) % visibleRows.length;
+        renderProjectDetails(visibleRows[nextPosition]);
+    }
+
+    projectDialogClose?.addEventListener("click", () => projectDialog.close());
+    previousProject?.addEventListener("click", () => moveProjectDialog(-1));
+    nextProject?.addEventListener("click", () => moveProjectDialog(1));
+    projectDialog?.addEventListener("click", (event) => {
+        if (event.target === projectDialog) {
+            projectDialog.close();
+        }
+    });
+    projectDialog?.addEventListener("cancel", (event) => {
+        event.preventDefault();
+        projectDialog.close();
+    });
+    projectDialog?.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+            event.preventDefault();
+            projectDialog.close();
+            return;
+        }
+        trapDialogFocus(projectDialog, event);
+    });
+    projectDialog?.addEventListener("close", () => {
+        activeProjectRow = null;
+        if (projectReturnFocus?.isConnected) {
+            projectReturnFocus.focus();
+        }
+    });
+
+    async function copyContactEmail() {
+        const email = document.querySelector("[data-copy-email]")?.textContent.trim();
+        if (!email) {
+            return false;
+        }
+
+        let copied = false;
+        try {
+            if (!navigator.clipboard?.writeText) {
+                throw new Error("Clipboard API is unavailable");
+            }
+            await navigator.clipboard.writeText(email);
+            copied = true;
+        } catch {
+            const fallback = document.createElement("textarea");
+            fallback.value = email;
+            fallback.setAttribute("readonly", "");
+            fallback.className = "visually-hidden";
+            document.body.append(fallback);
+            fallback.select();
+            try {
+                copied = document.execCommand("copy");
+            } catch {
+                copied = false;
+            }
+            fallback.remove();
+        }
+
+        if (copyToast) {
+            window.clearTimeout(copyToastTimer);
+            copyToast.textContent = copied ? "Copied" : `Select and copy: ${email}`;
+            copyToast.hidden = false;
+            copyToastTimer = window.setTimeout(() => {
+                copyToast.hidden = true;
+            }, 2200);
+        }
+        return copied;
+    }
+
+    document.addEventListener("click", (event) => {
+        if (!(event.target instanceof Element)) {
+            return;
+        }
+
+        const techButton = event.target.closest("[data-tech-filter]");
+        if (techButton) {
+            event.preventDefault();
+            selectedCategory = "all";
+            selectedTechnology = normalizeTechnology(techButton.dataset.techFilter);
+            applyProjectFilters(Boolean(techButton.hasAttribute("data-scroll-project-filter")));
+            if (projectDialog?.open) {
+                projectDialog.close();
+            }
+            return;
+        }
+
+        const projectButton = event.target.closest("[data-project-open]");
+        if (projectButton) {
+            const row = projectButton.closest("[data-project-row]");
+            if (row) {
+                openProjectDialog(row, projectButton);
+            }
+            return;
+        }
+
+        const emailLink = event.target.closest("[data-copy-email]");
+        if (emailLink) {
+            event.preventDefault();
+            copyContactEmail();
+        }
+    });
+
+    backToTop?.addEventListener("click", () => {
+        window.scrollTo({ top: 0, behavior: prefersReducedMotion ? "auto" : "smooth" });
+    });
+
+    if (backToTop) {
+        const updateBackToTop = () => {
+            backToTop.hidden = window.scrollY < window.innerHeight;
+        };
+        window.addEventListener("scroll", updateBackToTop, { passive: true });
+        window.addEventListener("resize", updateBackToTop, { passive: true });
+        updateBackToTop();
+    }
+
+    const commandPalette = document.getElementById("commandPalette");
+    const commandPaletteTrigger = document.getElementById("commandPaletteTrigger");
+    const commandPaletteInput = document.getElementById("commandPaletteInput");
+    const commandPaletteResults = document.getElementById("commandPaletteResults");
+    const commandPaletteStatus = document.getElementById("commandPaletteStatus");
+    const commandSections = [
+        { label: "Home", sectionId: "hero", type: "section" },
+        { label: "About", sectionId: "about", type: "section" },
+        { label: "Skills", sectionId: "skills", type: "section" },
+        { label: "Projects", sectionId: "projects", type: "section" },
+        { label: "Contact", sectionId: "contact", type: "section" },
+    ];
+    const commandActions = [
+        { label: "Copy email", type: "action", action: "copy-email" },
+        { label: "Open GitHub", type: "action", action: "github" },
+        { label: "Open LinkedIn", type: "action", action: "linkedin" },
+    ];
+    const commandOptions = [
+        ...commandSections,
+        ...projectRows.map((row) => ({
+            label: row.querySelector(".project-title-wrap h3")?.textContent.trim() || "Untitled project",
+            type: "project",
+            row,
+        })),
+        ...commandActions,
+    ];
+    let visibleCommandOptions = [];
+    let selectedCommandIndex = 0;
+    let commandReturnFocus = null;
+    let restoreCommandFocus = true;
+    let shortcutReturnFocus = null;
+
+    function openCommandPalette() {
+        if (!commandPalette || typeof commandPalette.showModal !== "function") {
+            return;
+        }
+        commandReturnFocus = document.activeElement;
+        restoreCommandFocus = true;
+        commandPalette.showModal();
+        commandPaletteInput.setAttribute("aria-expanded", "true");
+        commandPaletteInput.value = "";
+        renderCommandOptions();
+        commandPaletteInput.focus();
+    }
+
+    function closeCommandPalette(restoreFocus = true) {
+        if (!commandPalette?.open) {
+            return;
+        }
+        restoreCommandFocus = restoreFocus;
+        commandPalette.close();
+    }
+
+    function fuzzyMatch(query, value) {
+        let queryIndex = 0;
+        const normalizedValue = value.toLocaleLowerCase();
+        for (const character of query.toLocaleLowerCase()) {
+            queryIndex = normalizedValue.indexOf(character, queryIndex);
+            if (queryIndex === -1) {
+                return false;
+            }
+            queryIndex += 1;
+        }
+        return true;
+    }
+
+    function selectCommandOption(index) {
+        if (!visibleCommandOptions.length) {
+            commandPaletteInput.removeAttribute("aria-activedescendant");
+            return;
+        }
+        selectedCommandIndex = (index + visibleCommandOptions.length) % visibleCommandOptions.length;
+        const options = commandPaletteResults.querySelectorAll("[role='option']");
+        options.forEach((option, optionIndex) => {
+            const selected = optionIndex === selectedCommandIndex;
+            option.setAttribute("aria-selected", String(selected));
+            option.classList.toggle("is-active", selected);
+        });
+        const activeOption = options[selectedCommandIndex];
+        commandPaletteInput.setAttribute("aria-activedescendant", activeOption.id);
+        activeOption.scrollIntoView({ block: "nearest" });
+    }
+
+    function renderCommandOptions() {
+        if (!commandPaletteResults || !commandPaletteInput) {
+            return;
+        }
+
+        const query = commandPaletteInput.value.trim();
+        visibleCommandOptions = commandOptions.filter((option) =>
+            !query || fuzzyMatch(query, `${option.label} ${option.type}`)
+        );
+        commandPaletteResults.replaceChildren();
+        visibleCommandOptions.forEach((option, index) => {
+            const item = document.createElement("li");
+            item.setAttribute("role", "presentation");
+            const result = document.createElement("button");
+            result.id = `command-option-${index}`;
+            result.type = "button";
+            result.className = "command-result";
+            result.setAttribute("role", "option");
+            result.setAttribute("aria-selected", "false");
+
+            const label = document.createElement("span");
+            label.textContent = option.label;
+            const category = document.createElement("small");
+            category.textContent = option.type === "action" ? "QUICK ACTION" : option.type.toUpperCase();
+            result.append(label, category);
+            item.append(result);
+            commandPaletteResults.append(item);
+        });
+
+        selectedCommandIndex = 0;
+        if (commandPaletteStatus) {
+            commandPaletteStatus.textContent = visibleCommandOptions.length
+                ? `${visibleCommandOptions.length} result${visibleCommandOptions.length === 1 ? "" : "s"}`
+                : "No results found";
+        }
+        commandPaletteInput.setAttribute("aria-expanded", String(visibleCommandOptions.length > 0));
+        if (visibleCommandOptions.length) {
+            selectCommandOption(0);
+        } else {
+            commandPaletteInput.removeAttribute("aria-activedescendant");
+        }
+    }
+
+    function activateCommandOption(option) {
+        if (option.type === "section") {
+            closeCommandPalette(false);
+            const target = document.getElementById(option.sectionId);
+            target?.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth" });
+            return;
+        }
+
+        if (option.type === "project") {
+            closeCommandPalette(false);
+            window.setTimeout(() => openProjectDialog(option.row, commandPaletteTrigger), 0);
+            return;
+        }
+
+        closeCommandPalette(false);
+        if (option.action === "copy-email") {
+            copyContactEmail();
+        } else if (option.action === "github" || option.action === "linkedin") {
+            const link = document.querySelector(`.contact-links a[href*='${option.action === "github" ? "github.com" : "linkedin.com"}']`);
+            if (link) {
+                window.open(link.href, "_blank", "noopener,noreferrer");
+            }
+        }
+    }
+
+    commandPaletteTrigger?.addEventListener("click", openCommandPalette);
+    commandPaletteInput?.addEventListener("input", renderCommandOptions);
+    commandPaletteInput?.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowDown") {
+            event.preventDefault();
+            selectCommandOption(selectedCommandIndex + 1);
+        } else if (event.key === "ArrowUp") {
+            event.preventDefault();
+            selectCommandOption(selectedCommandIndex - 1);
+        } else if (event.key === "Enter" && visibleCommandOptions.length) {
+            event.preventDefault();
+            activateCommandOption(visibleCommandOptions[selectedCommandIndex]);
+        }
+    });
+    commandPaletteResults?.addEventListener("click", (event) => {
+        if (!(event.target instanceof Element)) {
+            return;
+        }
+        const result = event.target.closest("[role='option']");
+        if (result) {
+            const index = Number(result.id.replace("command-option-", ""));
+            activateCommandOption(visibleCommandOptions[index]);
+        }
+    });
+    commandPalette?.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+            event.preventDefault();
+            closeCommandPalette();
+            return;
+        }
+        trapDialogFocus(commandPalette, event);
+    });
+    commandPalette?.addEventListener("cancel", (event) => {
+        event.preventDefault();
+        closeCommandPalette();
+    });
+    commandPalette?.addEventListener("click", (event) => {
+        if (event.target === commandPalette) {
+            closeCommandPalette();
+        }
+    });
+    commandPalette?.addEventListener("close", () => {
+        commandPaletteInput?.setAttribute("aria-expanded", "false");
+        if (restoreCommandFocus && commandReturnFocus?.isConnected) {
+            commandReturnFocus.focus();
+        }
+    });
+
+    const shortcutHelp = document.getElementById("shortcutHelp");
+    const shortcutHelpClose = document.getElementById("shortcutHelpClose");
+    const sectionShortcuts = { p: "projects", a: "about", s: "skills", c: "contact" };
+    let pendingSectionShortcut = false;
+    let sectionShortcutTimer = 0;
+
+    function openShortcutHelp() {
+        if (!shortcutHelp || typeof shortcutHelp.showModal !== "function") {
+            return;
+        }
+        shortcutReturnFocus = document.activeElement;
+        shortcutHelp.showModal();
+        shortcutHelpClose?.focus();
+    }
+
+    function closeShortcutHelp() {
+        if (shortcutHelp?.open) {
+            shortcutHelp.close();
+        }
+    }
+
+    shortcutHelpClose?.addEventListener("click", closeShortcutHelp);
+    shortcutHelp?.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+            event.preventDefault();
+            closeShortcutHelp();
+            return;
+        }
+        trapDialogFocus(shortcutHelp, event);
+    });
+    shortcutHelp?.addEventListener("cancel", (event) => {
+        event.preventDefault();
+        closeShortcutHelp();
+    });
+    shortcutHelp?.addEventListener("click", (event) => {
+        if (event.target === shortcutHelp) {
+            closeShortcutHelp();
+        }
+    });
+    shortcutHelp?.addEventListener("close", () => {
+        if (shortcutReturnFocus?.isConnected) {
+            shortcutReturnFocus.focus();
+        }
+    });
+
+    document.addEventListener("keydown", (event) => {
+        const target = event.target;
+        const isTyping = target instanceof Element
+            && target.closest("input, textarea, select, [contenteditable='true']");
+
+        if ((event.metaKey || event.ctrlKey) && event.key.toLocaleLowerCase() === "k") {
+            if (window.matchMedia("(pointer: coarse)").matches) {
+                return;
+            }
+            event.preventDefault();
+            openCommandPalette();
+            return;
+        }
+
+        if (isTyping || commandPalette?.open || projectDialog?.open || shortcutHelp?.open) {
+            return;
+        }
+
+        if (event.key === "?") {
+            event.preventDefault();
+            openShortcutHelp();
+            return;
+        }
+
+        if (pendingSectionShortcut) {
+            pendingSectionShortcut = false;
+            window.clearTimeout(sectionShortcutTimer);
+            const sectionId = sectionShortcuts[event.key.toLocaleLowerCase()];
+            if (sectionId) {
+                document.getElementById(sectionId)?.scrollIntoView({
+                    behavior: prefersReducedMotion ? "auto" : "smooth",
+                });
+            }
+            return;
+        }
+
+        if (event.key.toLocaleLowerCase() === "g") {
+            pendingSectionShortcut = true;
+            window.clearTimeout(sectionShortcutTimer);
+            sectionShortcutTimer = window.setTimeout(() => {
+                pendingSectionShortcut = false;
+            }, 900);
+        }
+    });
+
     const contactForm = document.getElementById("contactForm");
     if (contactForm) {
         let isSubmitting = false;
         const submitButton = contactForm.querySelector("button[type='submit']");
         const submitLabel = submitButton?.querySelector(".submit-label");
         const statusMessage = document.getElementById("contactStatus");
+        const formError = document.getElementById("contactFormError");
+        const thankYouPanel = document.getElementById("contactThankYou");
+        const thankYouMessage = document.getElementById("contactThankYouMessage");
+        const sendAnotherButton = document.getElementById("sendAnotherMessage");
+        const messageField = document.getElementById("contact-message");
+        const characterCount = document.getElementById("contactMessageCount");
+        const fields = Array.from(contactForm.querySelectorAll("input[required], textarea[required]"));
+
+        const fieldMessages = {
+            "contact-name": "Please enter your name.",
+            "contact-email": "Enter a valid email address.",
+            "contact-subject": "Please add a subject.",
+            "contact-message": "Please write a short message.",
+        };
+
+        function validateField(field) {
+            let message = "";
+            if (field.validity.valueMissing) {
+                message = fieldMessages[field.id] || "Please complete this field.";
+            } else if (field.validity.typeMismatch) {
+                message = fieldMessages[field.id] || "Check this value and try again.";
+            } else if (field.validity.tooLong) {
+                message = `Please use no more than ${field.maxLength} characters.`;
+            }
+
+            const fieldErrorIds = {
+                "contact-name": "contactNameError",
+                "contact-email": "contactEmailError",
+                "contact-subject": "contactSubjectError",
+                "contact-message": "contactMessageError",
+            };
+            const fieldError = document.getElementById(fieldErrorIds[field.id]);
+            if (fieldError) {
+                fieldError.textContent = message;
+                fieldError.hidden = !message;
+            }
+            field.setAttribute("aria-invalid", String(Boolean(message)));
+            return !message;
+        }
+
+        function updateMessageCount() {
+            if (messageField && characterCount) {
+                characterCount.textContent = `${messageField.value.length} / ${messageField.maxLength} characters`;
+            }
+        }
+
+        function clearFormErrors() {
+            formError && (formError.hidden = true);
+            if (statusMessage) {
+                statusMessage.textContent = "";
+                statusMessage.classList.remove("is-error");
+            }
+            fields.forEach((field) => {
+                field.setAttribute("aria-invalid", "false");
+                const errorId = {
+                    "contact-name": "contactNameError",
+                    "contact-email": "contactEmailError",
+                    "contact-subject": "contactSubjectError",
+                    "contact-message": "contactMessageError",
+                }[field.id];
+                const errorElement = document.getElementById(errorId);
+                if (errorElement) {
+                    errorElement.textContent = "";
+                    errorElement.hidden = true;
+                }
+            });
+        }
+
+        fields.forEach((field) => {
+            field.addEventListener("blur", () => validateField(field));
+            field.addEventListener("input", () => {
+                if (field.getAttribute("aria-invalid") === "true") {
+                    validateField(field);
+                }
+                formError && (formError.hidden = true);
+            });
+        });
+        messageField?.addEventListener("input", updateMessageCount);
+        updateMessageCount();
 
         contactForm.addEventListener("submit", async (event) => {
             event.preventDefault();
-            if (isSubmitting || !contactForm.reportValidity()) {
+            if (isSubmitting) {
+                return;
+            }
+
+            const invalidFields = fields.filter((field) => !validateField(field));
+            if (invalidFields.length) {
+                invalidFields[0].focus();
                 return;
             }
 
@@ -388,19 +1184,33 @@ document.addEventListener("DOMContentLoaded", () => {
                 const result = await response.json().catch(() => null);
 
                 if (!response.ok || !result || typeof result.success !== "boolean") {
+                    const errorText = result?.message || "Your message could not be processed. Please try again.";
+                    if (formError) {
+                        formError.textContent = errorText;
+                        formError.hidden = false;
+                    }
                     if (statusMessage) {
-                        statusMessage.textContent = result?.message || "Your message could not be processed. Please try again.";
+                        statusMessage.textContent = errorText;
                         statusMessage.classList.add("is-error");
                     }
                     return;
                 }
 
-                if (statusMessage) {
-                    statusMessage.textContent = result.message;
-                    statusMessage.classList.toggle("is-error", !result.success);
-                }
                 if (result.success) {
                     contactForm.reset();
+                    updateMessageCount();
+                    clearFormErrors();
+                    if (thankYouMessage) {
+                        thankYouMessage.textContent = result.message;
+                    }
+                    contactForm.hidden = true;
+                    if (thankYouPanel) {
+                        thankYouPanel.hidden = false;
+                        thankYouPanel.focus();
+                    }
+                } else if (statusMessage) {
+                    statusMessage.textContent = result.message;
+                    statusMessage.classList.add("is-error");
                 }
             } catch {
                 if (statusMessage) {
@@ -417,6 +1227,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 contactForm.removeAttribute("aria-busy");
             }
+        });
+
+        sendAnotherButton?.addEventListener("click", () => {
+            thankYouPanel.hidden = true;
+            contactForm.hidden = false;
+            contactForm.reset();
+            clearFormErrors();
+            updateMessageCount();
+            contactForm.querySelector("#contact-name")?.focus();
         });
     }
 });

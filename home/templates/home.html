@@ -8,19 +8,37 @@
     <meta charset="UTF-8">
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Aniket Kanade | Portfolio</title>
+    <meta name="description" content="{{ meta_description }}">
+    <link rel="canonical" href="{{ canonical_url }}">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ page_title }}">
+    <meta property="og:description" content="{{ meta_description }}">
+    <meta property="og:url" content="{{ canonical_url }}">
+    <meta property="og:image" content="{{ profile_image_url }}">
+    <meta property="og:image:width" content="1254">
+    <meta property="og:image:height" content="1254">
+    <meta property="og:image:alt" content="Portrait of Aniket Kanade">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ page_title }}">
+    <meta name="twitter:description" content="{{ meta_description }}">
+    <meta name="twitter:image" content="{{ profile_image_url }}">
+    <title>{{ page_title }}</title>
+    <link rel="preload" href="https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggexSg.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{% static 'images/profile.jpg' %}" as="image" fetchpriority="high">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Instrument+Serif:ital@1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=4">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=11">
 <link
     rel="stylesheet"
     href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css"
 >
+    <script type="application/ld+json">{{ person_schema_json|safe }}</script>
 </head>
 
 <body>
+    <a class="skip-to-content" href="#main-content">Skip to content</a>
+    {% with availability_message="Open to internships and collaborations" %}
     <div class="scroll-progress" aria-hidden="true"><span id="scrollProgressBar"></span></div>
     <div class="cursor-dot" id="customCursorDot" aria-hidden="true"></div>
     <div class="cursor-ring" id="customCursorRing" aria-hidden="true"><span>VIEW</span></div>
@@ -61,6 +79,9 @@
             <a href="#contact">CONTACT</a>
 
         </div>
+        <button class="command-palette-trigger" id="commandPaletteTrigger" type="button" aria-haspopup="dialog" aria-controls="commandPalette">
+            <span>SEARCH</span><kbd>⌘K</kbd>
+        </button>
         <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation" aria-controls="navLinks" aria-expanded="false">
             ☰
         </button>
@@ -72,22 +93,42 @@
          HERO SECTION
     ========================== -->
 
-    <main>
+    <main id="main-content">
 
         <section class="hero" id="hero" aria-labelledby="hero-title">
             <div class="hero-copy animate-on-scroll">
                 <p class="hero-intro">HELLO, I'M</p>
                 <h1 class="hero-name" id="hero-title">ANIKET<br>KANADE</h1>
-                <p class="hero-role">PYTHON DEVELOPER</p>
+                <div class="hero-role-line">
+                    <span class="hero-role-static">PYTHON DEVELOPER</span>
+                    <span class="role-divider" aria-hidden="true">/</span>
+                    <span class="role-rotator" id="roleRotator" aria-live="polite"><span id="rotatingRole">DJANGO DEVELOPER</span></span>
+                </div>
+                <div class="hero-meta">
+                    <span class="live-clock"><span>PUNE, INDIA &middot;</span> <time id="indiaTime">--:-- IST</time></span>
+                    <span class="availability-badge"><span class="availability-dot" aria-hidden="true"></span>{{ availability_message }}</span>
+                </div>
                 <p class="description">I build web applications, machine learning solutions and IoT projects using modern technology.</p>
                 <div class="hero-buttons">
                     <a class="button button-lime" href="#projects" data-magnetic>VIEW MY WORK <span aria-hidden="true">&#8599;</span></a>
                     <a class="button button-outline" href="#contact" data-magnetic>CONTACT ME</a>
+                    {% comment %}
+                    Add a real resume at home/static/files/resume.pdf, then uncomment this button.
+                    <a class="button button-outline" href="{% static 'files/resume.pdf' %}" download>DOWNLOAD RESUME</a>
+                    {% endcomment %}
                 </div>
             </div>
-            <img src="{% static 'images/profile.jpg' %}" alt="Portrait of Aniket Kanade" class="hero-image">
+            <img src="{% static 'images/profile.jpg' %}" alt="Portrait of Aniket Kanade" class="hero-image" width="1254" height="1254" fetchpriority="high">
             <span class="hero-number" aria-hidden="true">01</span>
+            <a class="scroll-cue" href="#techMarquee" aria-label="Scroll to the technology ticker"><span>SCROLL</span><span class="scroll-cue-line" aria-hidden="true"></span></a>
 
+        </section>
+
+        <section class="tech-marquee" id="techMarquee" aria-label="Python, Django, data science, machine learning, AI, and IoT">
+            <div class="tech-marquee-track" aria-hidden="true">
+                <div class="tech-marquee-group"><span>PYTHON</span><i>&bull;</i><span>DJANGO</span><i>&bull;</i><span>DATA SCIENCE</span><i>&bull;</i><span>MACHINE LEARNING</span><i>&bull;</i><span>AI</span><i>&bull;</i><span>IoT</span><i>&bull;</i></div>
+                <div class="tech-marquee-group"><span>PYTHON</span><i>&bull;</i><span>DJANGO</span><i>&bull;</i><span>DATA SCIENCE</span><i>&bull;</i><span>MACHINE LEARNING</span><i>&bull;</i><span>AI</span><i>&bull;</i><span>IoT</span><i>&bull;</i></div>
+            </div>
         </section>
 
 
@@ -133,12 +174,31 @@
 
             </div>
             <div class="about-stats">
-                <div class="stat"><span class="stat-number">10+</span><span class="stat-label">PROJECTS BUILT</span></div>
-                <div class="stat"><span class="stat-number">8+</span><span class="stat-label">TECHNOLOGIES</span></div>
-                <div class="stat"><span class="stat-number">2+</span><span class="stat-label">YEARS LEARNING</span></div>
-                <div class="stat"><span class="stat-number">∞</span><span class="stat-label">IDEAS &amp; CURIOSITY</span></div>
+                {% with project_count=projects|length %}
+                <div class="stat"><span class="stat-number" data-count="{{ project_count }}">{{ project_count }}</span><span class="stat-label">PROJECTS</span></div>
+                {% endwith %}
             </div>
         </section>
+
+        <section class="learning-journey section-shell animate-on-scroll" id="learningJourney" aria-labelledby="learningJourneyTitle">
+            <div class="section-header">
+                <span class="section-number">03</span>
+                <h2 id="learningJourneyTitle">LEARNING <em>journey</em></h2>
+            </div>
+            <ol class="journey-list">
+                {% for entry in learning_journey %}
+                <li class="journey-entry">
+                    <span class="journey-year">{{ entry.year }}</span>
+                    <div class="journey-copy">
+                        <p class="journey-example">EXAMPLE - REPLACE WITH A REAL MILESTONE</p>
+                        <h3>{{ entry.title }}</h3>
+                        <p>{{ entry.description }}</p>
+                    </div>
+                </li>
+                {% endfor %}
+            </ol>
+        </section>
+
             <!-- =========================
      SKILLS SECTION
 ========================== -->
@@ -169,6 +229,14 @@
                 <p>CSS</p>
                 <p>JavaScript</p>
                 <p>Responsive Design</p>
+                {% with skill_usage=skill_project_matches.frontend %}
+                {% if skill_usage %}
+                <div class="skill-project-usage">
+                    <p>Used in {{ skill_usage.count }} project{{ skill_usage.count|pluralize }}</p>
+                    <div class="skill-project-chips">{% for technology in skill_usage.technologies %}<button class="skill-project-chip" type="button" data-tech-filter="{{ technology|lower }}" data-scroll-project-filter>{{ technology }}</button>{% endfor %}</div>
+                </div>
+                {% endif %}
+                {% endwith %}
             </div>
         </div>
 
@@ -219,6 +287,14 @@
                 <p>
                     PostgreSQL
                 </p>
+                {% with skill_usage=skill_project_matches.backend %}
+                {% if skill_usage %}
+                <div class="skill-project-usage">
+                    <p>Used in {{ skill_usage.count }} project{{ skill_usage.count|pluralize }}</p>
+                    <div class="skill-project-chips">{% for technology in skill_usage.technologies %}<button class="skill-project-chip" type="button" data-tech-filter="{{ technology|lower }}" data-scroll-project-filter>{{ technology }}</button>{% endfor %}</div>
+                </div>
+                {% endif %}
+                {% endwith %}
 
             </div>
 
@@ -268,6 +344,14 @@
                 <p>
                     Machine Learning
                 </p>
+                {% with skill_usage=skill_project_matches.data_science %}
+                {% if skill_usage %}
+                <div class="skill-project-usage">
+                    <p>Used in {{ skill_usage.count }} project{{ skill_usage.count|pluralize }}</p>
+                    <div class="skill-project-chips">{% for technology in skill_usage.technologies %}<button class="skill-project-chip" type="button" data-tech-filter="{{ technology|lower }}" data-scroll-project-filter>{{ technology }}</button>{% endfor %}</div>
+                </div>
+                {% endif %}
+                {% endwith %}
 
             </div>
 
@@ -309,6 +393,14 @@
                 <p>
                     APIs
                 </p>
+                {% with skill_usage=skill_project_matches.ai %}
+                {% if skill_usage %}
+                <div class="skill-project-usage">
+                    <p>Used in {{ skill_usage.count }} project{{ skill_usage.count|pluralize }}</p>
+                    <div class="skill-project-chips">{% for technology in skill_usage.technologies %}<button class="skill-project-chip" type="button" data-tech-filter="{{ technology|lower }}" data-scroll-project-filter>{{ technology }}</button>{% endfor %}</div>
+                </div>
+                {% endif %}
+                {% endwith %}
 
             </div>
 
@@ -354,6 +446,14 @@
                 <p>
                     IoT Applications
                 </p>
+                {% with skill_usage=skill_project_matches.iot %}
+                {% if skill_usage %}
+                <div class="skill-project-usage">
+                    <p>Used in {{ skill_usage.count }} project{{ skill_usage.count|pluralize }}</p>
+                    <div class="skill-project-chips">{% for technology in skill_usage.technologies %}<button class="skill-project-chip" type="button" data-tech-filter="{{ technology|lower }}" data-scroll-project-filter>{{ technology }}</button>{% endfor %}</div>
+                </div>
+                {% endif %}
+                {% endwith %}
 
             </div>
 
@@ -399,6 +499,14 @@
                 <p>
                     Figma
                 </p>
+                {% with skill_usage=skill_project_matches.tools %}
+                {% if skill_usage %}
+                <div class="skill-project-usage">
+                    <p>Used in {{ skill_usage.count }} project{{ skill_usage.count|pluralize }}</p>
+                    <div class="skill-project-chips">{% for technology in skill_usage.technologies %}<button class="skill-project-chip" type="button" data-tech-filter="{{ technology|lower }}" data-scroll-project-filter>{{ technology }}</button>{% endfor %}</div>
+                </div>
+                {% endif %}
+                {% endwith %}
 
             </div>
 
@@ -534,102 +642,126 @@
 </section>
 
     <section class="projects section-shell animate-on-scroll" id="projects" aria-labelledby="projects-title">
+        <div class="section-header">
+            <span class="section-number">05</span>
+            <h2 id="projects-title">SELECTED <em>work</em></h2>
+        </div>
 
-    <div class="section-header">
-        <span class="section-number">05</span>
-        <h2 id="projects-title">SELECTED <em>work</em></h2>
-    </div>
+        {% if project_categories|length > 1 %}
+        <div class="project-filter-controls" role="group" aria-label="Filter projects by category">
+            <button class="filter-pill is-selected" type="button" data-category-filter="all" aria-pressed="true">ALL</button>
+            {% for category in project_categories %}
+            <button class="filter-pill" type="button" data-category-filter="{{ category }}" aria-pressed="false">{{ category }}</button>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <button class="clear-project-filter" id="clearProjectFilter" type="button" hidden>CLEAR FILTER</button>
 
-    <div class="projects-list">
-
-        {% for project in projects %}
-
-        <article class="project-card" data-project-row>
-
-            <div class="project-card-main">
-
-                <div class="project-info">
-
-                    <span class="project-number">
-                        {{ forloop.counter|stringformat:"02d" }}
-                    </span>
-
-                    <div class="project-title-wrap" data-project-title>
-
-                        <h3>{{ project.title }}</h3>
-
-                        {% if project.category %}<p class="project-category">{{ project.category }}</p>{% endif %}
-
-                        <p class="project-description">
-                            {{ project.description }}
-                        </p>
-
-                        {% if project.technologies %}
-                            <div class="project-tech">
-                                {% for tech in project.technologies|split_tags %}<span>{{ tech }}</span>{% endfor %}
+        <div class="projects-list" id="projectsList">
+            {% for project in projects %}
+            <article class="project-card" data-project-row data-project-category="{{ project.category|lower }}" data-project-index="{{ forloop.counter0 }}">
+                <div class="project-card-main">
+                    <div class="project-info">
+                        <span class="project-number">{{ forloop.counter|stringformat:"02d" }}</span>
+                        <div class="project-title-wrap" data-project-title>
+                            <h3><button class="project-open" type="button" data-project-open aria-haspopup="dialog" aria-label="Open case study: {{ project.title }}">{{ project.title }}</button></h3>
+                            {% if project.featured %}<span class="project-featured">FEATURED</span>{% endif %}
+                            {% if project.category %}<p class="project-category">{{ project.category }}</p>{% endif %}
+                            {% if project.description %}<p class="project-description">{{ project.description }}</p>{% endif %}
+                            {% if project.technologies %}
+                            <div class="project-tech" aria-label="Filter by a project technology">
+                                {% for tech in project.technologies|split_tags %}<button class="project-tech-filter" type="button" data-tech-filter="{{ tech|lower }}">{{ tech }}</button>{% endfor %}
                             </div>
-                        {% endif %}
-
-                        {% if project.github_url or project.live_url %}
-                        <div class="project-links">
-
-                            {% if project.github_url %}
-                            <a href="{{ project.github_url }}"
-                               target="_blank"
-                               rel="noopener noreferrer">
-                                GITHUB ↗
-                            </a>
                             {% endif %}
-
-                            {% if project.live_url %}
-                            <a href="{{ project.live_url }}"
-                               target="_blank"
-                               rel="noopener noreferrer">
-                                LIVE DEMO ↗
-                            </a>
+                            {% if project.github_url or project.live_url %}
+                            <div class="project-links">
+                                {% if project.github_url %}<a href="{{ project.github_url }}" target="_blank" rel="noopener noreferrer">GITHUB &#8599;</a>{% endif %}
+                                {% if project.live_url %}<a href="{{ project.live_url }}" target="_blank" rel="noopener noreferrer">LIVE DEMO &#8599;</a>{% endif %}
+                            </div>
                             {% endif %}
-
                         </div>
-                        {% endif %}
-
                     </div>
-
+                    {% if project.image %}
+                    <button class="project-image-wrap project-open" type="button" data-project-open data-cursor-view aria-label="Open case study: {{ project.title }}">
+                        <img src="{{ project.image.url }}" alt="{{ project.title }} project" class="project-image" width="{{ project.image.width }}" height="{{ project.image.height }}" loading="lazy" decoding="async">
+                    </button>
+                    {% else %}
+                    <button class="project-image-wrap project-image-placeholder project-open" type="button" data-project-open aria-label="Open case study: {{ project.title }}">
+                        <span>IMAGE<br>UNAVAILABLE</span>
+                    </button>
+                    {% endif %}
                 </div>
 
+                <template class="project-detail-template">
+                    <div class="project-detail-grid">
+                        {% if project.image %}<img class="project-detail-image" src="{{ project.image.url }}" alt="{{ project.title }} project" width="{{ project.image.width }}" height="{{ project.image.height }}" loading="lazy" decoding="async">{% endif %}
+                        <div class="project-detail-copy">
+                            {% if project.category %}<p class="project-detail-category">{{ project.category }}</p>{% endif %}
+                            {% if project.description %}<p class="project-detail-description">{{ project.description }}</p>{% endif %}
+                            {% if project.problem %}<section class="project-insight"><h3>Problem</h3><p>{{ project.problem }}</p></section>{% endif %}
+                            {% if project.approach %}<section class="project-insight"><h3>Approach</h3><p>{{ project.approach }}</p></section>{% endif %}
+                            {% if project.outcome %}<section class="project-insight"><h3>Outcome &amp; learning</h3><p>{{ project.outcome }}</p></section>{% endif %}
+                            {% if project.technologies %}
+                            <div class="project-detail-tech" aria-label="Filter by a project technology">
+                                {% for tech in project.technologies|split_tags %}<button class="project-tech-filter" type="button" data-tech-filter="{{ tech|lower }}">{{ tech }}</button>{% endfor %}
+                            </div>
+                            {% endif %}
+                            {% if project.github_url or project.live_url %}
+                            <div class="project-detail-links">
+                                {% if project.github_url %}<a class="button button-outline" href="{{ project.github_url }}" target="_blank" rel="noopener noreferrer">GITHUB &#8599;</a>{% endif %}
+                                {% if project.live_url %}<a class="button button-lime" href="{{ project.live_url }}" target="_blank" rel="noopener noreferrer">LIVE DEMO &#8599;</a>{% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </template>
+            </article>
+            {% empty %}
+            <p class="no-projects">PROJECTS COMING SOON.</p>
+            {% endfor %}
+        </div>
+        <p class="no-filtered-projects" id="noFilteredProjects" hidden>No projects match this filter.</p>
+    </section>
 
-                {% if project.image %}
-
-                <div class="project-image-wrap" data-project-image data-cursor-view>
-
-                    <img
-                        src="{{ project.image.url }}"
-                        alt="{{ project.title }} project"
-                        class="project-image"
-                        loading="lazy"
-                    >
-
-                </div>
-                {% else %}
-                <div class="project-image-wrap project-image-placeholder" aria-label="No project image available">
-                    <span>IMAGE<br>UNAVAILABLE</span>
-                </div>
-                {% endif %}
-
+    <dialog class="project-dialog" id="projectDialog" role="dialog" aria-modal="true" aria-labelledby="projectDialogTitle">
+        <div class="project-dialog-shell">
+            <div class="project-dialog-toolbar">
+                <span class="project-dialog-position" id="projectDialogPosition"></span>
+                <button class="project-dialog-close" id="projectDialogClose" type="button" aria-label="Close project details">&#215;</button>
             </div>
+            <h2 id="projectDialogTitle"></h2>
+            <div class="project-dialog-content" id="projectDialogContent"></div>
+            <div class="project-dialog-navigation">
+                <button class="filter-pill" id="previousProject" type="button">&#8592; PREVIOUS</button>
+                <button class="filter-pill" id="nextProject" type="button">NEXT &#8594;</button>
+            </div>
+        </div>
+    </dialog>
 
-        </article>
+    <dialog class="command-palette" id="commandPalette" role="dialog" aria-modal="true" aria-labelledby="commandPaletteTitle">
+        <div class="command-palette-panel">
+            <div class="command-palette-heading">
+                <h2 id="commandPaletteTitle">Search portfolio</h2>
+                <kbd>ESC</kbd>
+            </div>
+            <label class="visually-hidden" for="commandPaletteInput">Search sections, projects, and actions</label>
+            <input id="commandPaletteInput" type="search" role="combobox" aria-autocomplete="list" aria-controls="commandPaletteResults" aria-expanded="false" autocomplete="off">
+            <ul id="commandPaletteResults" role="listbox" aria-label="Search results"></ul>
+            <p id="commandPaletteStatus" class="command-palette-status" role="status" aria-live="polite"></p>
+        </div>
+    </dialog>
 
-        {% empty %}
-
-        <p class="no-projects">
-            PROJECTS COMING SOON.
-        </p>
-
-        {% endfor %}
-
-    </div>
-
-</section>
+    <dialog class="shortcut-help" id="shortcutHelp" role="dialog" aria-modal="true" aria-labelledby="shortcutHelpTitle">
+        <div class="shortcut-help-panel">
+            <div class="command-palette-heading"><h2 id="shortcutHelpTitle">Keyboard shortcuts</h2><button id="shortcutHelpClose" type="button" aria-label="Close shortcuts">&#215;</button></div>
+            <p><kbd>Ctrl/Cmd</kbd> + <kbd>K</kbd><span>Open search</span></p>
+            <p><kbd>?</kbd><span>Show this guide</span></p>
+            <p><kbd>G</kbd> then <kbd>P</kbd><span>Go to Projects</span></p>
+            <p><kbd>G</kbd> then <kbd>A</kbd><span>Go to About</span></p>
+            <p><kbd>G</kbd> then <kbd>S</kbd><span>Go to Skills</span></p>
+            <p><kbd>G</kbd> then <kbd>C</kbd><span>Go to Contact</span></p>
+        </div>
+    </dialog>
 <!-- =========================
      CONTACT SECTION
 ========================= -->
@@ -642,25 +774,41 @@
     <div class="contact-layout">
         <div class="contact-content">
             <p class="contact-kicker">HAVE AN IDEA OR WANT TO CONNECT?</p>
-            <a class="contact-email" href="mailto:aniketkanade2121@gmail.com">aniketkanade2121@gmail.com</a>
+            <a class="contact-email" href="mailto:aniketkanade2121@gmail.com" data-copy-email>aniketkanade2121@gmail.com</a>
             <div class="contact-links">
                 <a href="https://www.linkedin.com/in/aniket-kanade-a9bb90331" target="_blank" rel="noopener noreferrer">LINKEDIN <span aria-hidden="true">&#8599;</span></a>
                 <a href="https://github.com/aniketkanade25-dev" target="_blank" rel="noopener noreferrer">GITHUB <span aria-hidden="true">&#8599;</span></a>
             </div>
         </div>
-        <form method="POST" action="{% url 'home' %}" id="contactForm">
+        <form method="POST" action="{% url 'home' %}" id="contactForm" novalidate>
             {% csrf_token %}
+            <div class="contact-honeypot" aria-hidden="true">
+                <label for="contact-website">Leave this field blank</label>
+                <input id="contact-website" type="text" name="website" tabindex="-1" autocomplete="off">
+            </div>
+            <p class="contact-form-error" id="contactFormError" role="alert" hidden></p>
             <label for="contact-name">Your name</label>
-            <input id="contact-name" type="text" name="name" autocomplete="name" required maxlength="100">
+            <input id="contact-name" type="text" name="name" autocomplete="name" required maxlength="100" aria-describedby="contactNameError" aria-invalid="false">
+            <p class="field-error" id="contactNameError" hidden></p>
             <label for="contact-email">Your email</label>
-            <input id="contact-email" type="email" name="email" autocomplete="email" required>
+            <input id="contact-email" type="email" name="email" autocomplete="email" required maxlength="254" aria-describedby="contactEmailError" aria-invalid="false">
+            <p class="field-error" id="contactEmailError" hidden></p>
             <label for="contact-subject">Subject</label>
-            <input id="contact-subject" type="text" name="subject" required maxlength="200">
+            <input id="contact-subject" type="text" name="subject" required maxlength="200" aria-describedby="contactSubjectError" aria-invalid="false">
+            <p class="field-error" id="contactSubjectError" hidden></p>
             <label for="contact-message">Your message</label>
-            <textarea id="contact-message" name="message" rows="5" required></textarea>
+            <textarea id="contact-message" name="message" rows="5" required maxlength="1200" aria-describedby="contactMessageError contactMessageCount" aria-invalid="false"></textarea>
+            <p class="field-error" id="contactMessageError" hidden></p>
+            <p class="message-character-count" id="contactMessageCount" role="status" aria-live="polite">0 / 1200</p>
             <button class="button button-light" type="submit" data-magnetic><span class="submit-label">SEND MESSAGE</span><span aria-hidden="true">&#8599;</span></button>
             <p class="contact-status" id="contactStatus" role="status" aria-live="polite"></p>
         </form>
+        <div class="contact-thank-you" id="contactThankYou" tabindex="-1" hidden role="status" aria-live="polite">
+            <p class="contact-kicker">MESSAGE RECEIVED</p>
+            <h3>THANK YOU FOR REACHING OUT.</h3>
+            <p id="contactThankYouMessage"></p>
+            <button class="button button-outline" id="sendAnotherMessage" type="button">SEND ANOTHER</button>
+        </div>
     </div>
 </section>
         </main>
@@ -677,7 +825,10 @@
     </div>
     <p class="footer-wordmark" aria-label="Aniket Kanade">ANIKET KANADE</p>
 </footer>  
-<script src="{% static 'js/main.js' %}?v=3" defer></script>
+    <button class="back-to-top" id="backToTop" type="button" aria-label="Back to top" hidden>TOP <span aria-hidden="true">&#8593;</span></button>
+    <p class="copy-toast" id="copyToast" role="status" aria-live="polite" hidden></p>
+<script src="{% static 'js/main.js' %}?v=11" defer></script>
+    {% endwith %}
 </body>
 
 </html>
